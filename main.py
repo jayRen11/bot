@@ -1,7 +1,7 @@
 import os
 import sys
 
-# 🛡️ SQLite 兼容性补丁 (仅在 Linux/云端生效)
+# 🛡️ SQLite 兼容性补丁
 try:
     __import__('pysqlite3')
     sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
@@ -10,19 +10,32 @@ except ImportError:
 
 import streamlit as st
 
-# 🥇 必须是整个脚本的第一个 Streamlit 命令
 st.set_page_config(page_title="淮师大智能助手", page_icon="🏫", layout="wide")
 
-# 🚀 【核心修复】：智能判断运行环境
+# =================================================================
+# 🚀 终极网络与环境修复区 (专门针对 Streamlit Cloud)
+# =================================================================
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
-# 如果是在本地 Windows 运行，则使用国内镜像加速
 if sys.platform == "win32":
+    # 本地 Windows：使用镜像站加速
     os.environ["HF_ENDPOINT"] = "https://hf-mirror.com"
-# 如果是在 Streamlit Cloud (Linux) 运行，什么都不设置，让它直连官方原站！
 else:
-    # 确保清除可能存在的残留环境变量
+    # 云端 Linux：彻底清洗环境变量，强制直连官方
     os.environ.pop("HF_ENDPOINT", None)
+    os.environ["HF_ENDPOINT"] = "https://huggingface.co"
+    
+    # 🌟 核心修复 A：将缓存目录转移到具有绝对读写权限的 /tmp 目录
+    os.environ["HF_HOME"] = "/tmp/huggingface_cache"
+    
+    # 🌟 核心修复 B：尝试读取 Hugging Face Token 以绕过 IP 封锁
+    try:
+        if "HF_TOKEN" in st.secrets:
+            os.environ["HF_TOKEN"] = st.secrets["HF_TOKEN"]
+    except Exception:
+        pass
+
+
 from datetime import datetime
 from streamlit_mic_recorder import speech_to_text
 from gtts import gTTS
