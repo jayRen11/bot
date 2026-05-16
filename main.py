@@ -1,12 +1,18 @@
 import os
 import sys
 
-# 🛡️ SQLite 兼容性补丁 (非 Streamlit 命令，可放最前)
 try:
     __import__('pysqlite3')
     sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 except ImportError:
     pass
+
+import streamlit as st
+st.set_page_config(page_title="淮师大智能助手", page_icon="🏫", layout="wide")
+
+# 🌟 必须在 load_engines 之前注入
+os.environ["HF_ENDPOINT"] = "https://hf-mirror.com"
+os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
 import streamlit as st
 from datetime import datetime
@@ -18,8 +24,7 @@ from core.db_manager import DBManager
 from core.llm_engine import LLMEngine
 from core.document_parser import extract_text, chunk_text
 
-# 🥇 【核心修复】必须是整个脚本的第一个 Streamlit 命令！
-st.set_page_config(page_title="淮师大智能助手", page_icon="🏫", layout="wide")
+
 
 # ================= 配置区 =================
 API_KEY = os.getenv("DEEPSEEK_API_KEY", "")
@@ -36,8 +41,6 @@ if not API_KEY:
     if not API_KEY:
         st.stop()  # 暂停渲染，避免下方引擎初始化报错
 
-os.environ["HF_ENDPOINT"] = "https://hf-mirror.com"
-os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
 # ================= 1. 初始化核心引擎 =================
 @st.cache_resource
