@@ -1,6 +1,7 @@
 import os
 import sys
 
+# 🛡️ SQLite 兼容性补丁 (非 Streamlit 命令，可放最前)
 try:
     __import__('pysqlite3')
     sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
@@ -8,13 +9,14 @@ except ImportError:
     pass
 
 import streamlit as st
+
+# 🥇 【核心修复 1】必须是整个脚本的第一个 Streamlit 命令！
 st.set_page_config(page_title="淮师大智能助手", page_icon="🏫", layout="wide")
 
-# 🌟 必须在 load_engines 之前注入
+# 🚀 【核心修复 2】必须在导入或初始化任何大模型/向量库之前，强制注入环境变量！
 os.environ["HF_ENDPOINT"] = "https://hf-mirror.com"
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
-import streamlit as st
 from datetime import datetime
 from streamlit_mic_recorder import speech_to_text
 from gtts import gTTS
