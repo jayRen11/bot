@@ -132,9 +132,12 @@ with tab_chat:
         with st.chat_message("assistant"):
             with st.spinner("正在查阅资料与思考中..."):
                 retrieved_context = db_manager.search(final_input, current_mode)
-                reply = llm_engine.generate_reply(final_input, st.session_state.messages, retrieved_context,
-                                                  current_mode, enable_socratic)
-                st.markdown(reply)
+                
+                reply_stream = llm_engine.generate_reply(
+                    final_input, st.session_state.messages, retrieved_context,
+                    current_mode, enable_socratic)
+                
+                reply = st.write_stream(reply_stream)
 
                 if retrieved_context:
                     with st.expander("👁️ 查看底层检索资料 (防自编验证)"):
