@@ -18,8 +18,14 @@ class DBManager:
         target_db = self.get_collection(mode)
         if target_db.count() == 0:
             return ""
-        results = target_db.query(query_texts=[query], n_results=top_k)
-        return "\n".join(results['documents'][0])
+        try:
+            results = target_db.query(query_texts=[query], n_results=top_k)
+            if results and 'documents' in results and results['documents'] and results['documents'][0]:
+                return "\n".join(results['documents'][0])
+            return ""
+        except Exception as e:
+            print(f"检索异常: {e}")
+            return ""
 
     def ingest(self, chunks, mode, file_name):
         target_db = self.get_collection(mode)
