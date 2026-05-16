@@ -6,25 +6,7 @@ import docx
 from pdf2image import convert_from_bytes
 from PIL import Image
 import pytesseract
-
-# 🪟 Windows 本地运行路径自动适配 (云端 Linux 会自动忽略)
-if sys.platform == "win32":
-    # Tesseract 常见安装路径
-    tesseract_paths = [
-        r"C:\Program Files\Tesseract-OCR\tesseract.exe",
-        r"C:\Program Files (x86)\Tesseract-OCR\tesseract.exe"
-    ]
-    for p in tesseract_paths:
-        if os.path.exists(p):
-            pytesseract.pytesseract.tesseract_cmd = p
-            break
-
-    # Poppler 常见路径 (用于 pdf2image)
-    POPPLER_PATH = os.getenv("POPPLER_PATH", r"C:\poppler-26.02.0\Library\bin")
-    if not os.path.exists(POPPLER_PATH):
-        POPPLER_PATH = None
-else:
-    POPPLER_PATH = None
+from PIL import Image, ImageEnhance 
 
 
 def extract_text(uploaded_file):
@@ -57,7 +39,10 @@ def extract_text(uploaded_file):
                     text += pytesseract.image_to_string(img, lang='chi_sim') + "\n"
         elif file_name.endswith(('.png', '.jpg', '.jpeg')):
             img_pil = Image.open(uploaded_file).convert('RGB')
-            text = pytesseract.image_to_string(img_pil, lang='chi_sim')
+            img_gray = img_pil.convert('L')
+            enhancer = ImageEnhance.Contrast(img_gray)
+            img_enhanced = enhancer.enhance(2.0) # 提升一倍对比度
+            text = pytesseract.image_to_string(img_enhanced, lang='chi_sim')
 
         # 清理空白字符
         text = re.sub(r'\n+', '\n', text)
