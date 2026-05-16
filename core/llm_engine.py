@@ -25,11 +25,14 @@ class LLMEngine:
                 model="deepseek-chat",
                 messages=messages,
                 temperature=0.3 if socratic_mode else 0.1,
-                max_tokens=1024
+                max_tokens=1024,
+                stream=True  # 🚀 新增：开启流式输出
             )
-            return response.choices[0].message.content
+            for chunk in response:
+                if chunk.choices[0].delta.content is not None:
+                    yield chunk.choices[0].delta.content
         except Exception as e:
-            return f"网络请求异常: {e}"
+            yield f"网络请求异常: {e}"
 
     def generate_analysis_reply(self, ocr_text, analysis_type):
         if not ocr_text:
