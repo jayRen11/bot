@@ -10,7 +10,7 @@ except ImportError:
     pass
 
 import streamlit as st
-st.set_page_config(page_title="淮师大智能助手", page_icon="🏫", layout="wide")
+st.set_page_config(page_title="淮师智能助手", page_icon="🏫", layout="wide")
 
 
 from datetime import datetime
@@ -62,7 +62,7 @@ def text_to_audio_bytes(text):
 
 def generate_notes(messages):
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    md = f"# 📚 淮师大智能助手 - 专属复习笔记\n> 生成时间：{current_time}\n\n---\n\n"
+    md = f"# 📚 淮师智能助手 - 专属复习笔记\n> 生成时间：{current_time}\n\n---\n\n"
     for msg in messages:
         if msg["role"] == "assistant":
             if "你好同学" in msg["content"] or "专属学霸导师" in msg["content"]:
@@ -73,7 +73,7 @@ def generate_notes(messages):
     return md
 
 # ================= 3. Web 界面构建 =================
-st.title("🏫 校园全能智能助手 Pro+")
+st.title("🏫 校园全能智能助手")
 tab_chat, tab_vision, tab_admin = st.tabs(["💬 智能对话", "👁️ 视觉顾问", "🛠️ 知识库管理"])
 
 # 检查 API Key
