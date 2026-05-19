@@ -4,6 +4,8 @@ import sys
 try:
     __import__('pysqlite3')
     sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
+    print("🚀 [Cloud Patch] 检测到 Linux 环境，已成功使用 pysqlite3 覆盖原生落后版 sqlite3！")
+
 except ImportError:
     pass
 
