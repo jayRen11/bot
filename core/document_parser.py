@@ -37,12 +37,28 @@ def extract_text(uploaded_file):
                 images = convert_from_bytes(file_bytes, **kwargs)
                 for img in images:
                     text += pytesseract.image_to_string(img, lang='chi_sim') + "\n"
-        elif file_name.endswith(('.png', '.jpg', '.jpeg')):
+       elif file_name.endswith(('.png', '.jpg', '.jpeg')):
             img_pil = Image.open(uploaded_file).convert('RGB')
-            img_gray = img_pil.convert('L')
+            
+            # 1. 放大图像分辨率 (放大 2 倍)
+            # 课表截图文字通常较小，放大可以显著提升 Tesseract 的识别准确率
+            width, height = img_pil.size
+            img_resized = img_pil.resize((width * 2, height * 2), Image.Resampling.LANCZOS)
+            
+            # 2. 灰度化与对比度增强
+            img_gray = img_resized.convert('L')
             enhancer = ImageEnhance.Contrast(img_gray)
-            img_enhanced = enhancer.enhance(2.0) # 提升一倍对比度
-            text = pytesseract.image_to_string(img_enhanced, lang='chi_sim')
+            img_enhanced = enhancer.enhance(2.0)
+            
+            # 3. OCR 核心配置优化
+            # lang='chi_sim+eng'：同时开启中英文+数字识别
+            # --psm 6：假设图像为一个统一的文本块（对表格排版的容错率远好于默认的段落模式）
+            custom_config = r'--psm 6'
+            text = pytesseract.image_to_string(
+                img_enhanced, 
+                lang='chi_sim+eng', 
+                config=custom_config
+            )
 
         # 清理空白字符
         text = re.sub(r'\n+', '\n', text)
